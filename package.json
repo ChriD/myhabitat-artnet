@@ -1,0 +1,28 @@
+{
+  "name": "myhabitat-artnet",
+  "version": "0.0.1",
+  "description": "ARTNET for habitat",
+  "main": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ChriD",
+  "license": "ISC",
+  "keywords": [
+    "node-red",
+    "home automation system",
+    "myhabitat",
+    "myhabitat artnet"
+  ],
+  "node-red": {
+    "nodes": {
+      "myhabitat-adapter-artnet": "src/nodes/adapters/myhabitat.node.adapter.artnet.js",
+      "myhabitat-thing-artnet-light": "src/nodes/things/artnet/myhabitat.node.thing.artnet.light.js"
+    }
+  },
+  "dependencies": {
+    "app-root-path": "^2.2.1",
+    "artnet": "^1.4.0",
+    "myhabitat": "^0.0.1"
+  }
+}
