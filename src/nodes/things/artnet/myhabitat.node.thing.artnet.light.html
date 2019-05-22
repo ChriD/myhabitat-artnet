@@ -15,7 +15,7 @@
     },
     inputs: 1,
     outputs: 0,
-    icon: "light.png",
+    icon: 'light.png',
     paletteLabel: 'Light',
     label: function () {
         return this.name || 'Light';
@@ -25,24 +25,7 @@
     oneditprepare: function () {
 
       var self = this
-
-      var lightTypeElement            = document.getElementById("node-input-lightType")
-
-      // prepare the light type option box
-      var lightTypesArray = [ { id: 'SIMPLE', name: 'Light' },
-                              { id: 'TW',     name: 'Tunable white' },
-                              { id: 'RGB',    name: 'RGB' },
-                              { id: 'RGBW',   name: 'RGBW' }]
-
-      for (i = 0; i < lightTypesArray.length; i++) {
-        var option = document.createElement('option')
-        option.textContent = i + " : " + lightTypesArray[i].name + ' (' + lightTypesArray[i].id + ')'
-        option.setAttribute('value', lightTypesArray[i].id)
-        lightTypeElement.appendChild(option)
-      }
-      lightTypeElement.value = this.lightType || 0
-
-
+      var lightTypeElement = document.getElementById("node-input-lightType")
       updateDesign()
 
       // when selection of the type of light is changed, we have to store it back into our default value
@@ -92,7 +75,12 @@
 
         <div class="form-row">
             <label for="node-input-lightType" style="width:11em"><i class="icon-tag"></i> Typ</label>
-            <select id="node-input-lightType"></select>
+            <select id="node-input-lightType">
+              <option value="SIMPLE">Simple light</option>
+              <option value="TW">Tuneable white</option>
+              <option value="RGB">RGB</option>
+              <option value="RGBW">RGBW</option>
+            </select>
         </div>
 
         <!-- Channels for the given types of lights -->
