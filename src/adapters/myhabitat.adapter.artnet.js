@@ -152,9 +152,9 @@ class MyHabitatAdapter_Artnet extends MyHabitatAdapter
     const keys = Object.keys(this.bufferAction)
     for(var idx=0; idx<keys.length; idx++)
     {
-      const actionObj = this.bufferAction[keys[idx]] // TODO: @@@
       try
       {
+        const actionObj = this.bufferAction[keys[idx]]
         var deleteBufferAction = false
         switch(actionObj.action.toUpperCase())
         {
@@ -192,14 +192,6 @@ class MyHabitatAdapter_Artnet extends MyHabitatAdapter
       catch(_exception)
       {
         self.logError('Error processing artnet buffer: ' + _exception.toString(), _exception)
-        console.log(JSON.stringify(this.buffer[actionObj.channel-1]))
-        console.log(JSON.stringify(actionObj))
-        console.log(JSON.stringify(Object.keys(this.bufferAction)))
-        /*
-        null
-        {"action":"FADETO","channel":"49","value":null,"fadeTime":"250","step":-5.08}
-        ["48"]
-        */
       }
     }
   }
