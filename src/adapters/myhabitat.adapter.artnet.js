@@ -109,6 +109,20 @@ class MyHabitatAdapter_Artnet extends MyHabitatAdapter
     const channel   = _data.channel-1
     _data.action    = _data.action   ? _data.action.toUpperCase()    : "SET"
 
+    if(!channel || channel < 0)
+    {
+      this.logError('Calling action on channel 0 or null')
+      return
+    }
+
+    // we do need to have a value in the data object. At least if we are haveing the action 'set' or 'fadeto'
+    // if we are implementing more actions we have to adapt this code
+    if(isNaN(_data.value))
+    {
+      this.logError('Calling action without any value')
+      return
+    }
+
     switch(_data.action)
     {
       case "SET":
@@ -138,40 +152,55 @@ class MyHabitatAdapter_Artnet extends MyHabitatAdapter
     const keys = Object.keys(this.bufferAction)
     for(var idx=0; idx<keys.length; idx++)
     {
-      var deleteBufferAction = false
-      const actionObj = this.bufferAction[keys[idx]]
-      switch(actionObj.action.toUpperCase())
+      const actionObj = this.bufferAction[keys[idx]] // TODO: @@@
+      try
       {
-        case "FADETO":
-          this.buffer[actionObj.channel-1] += actionObj.step
-          if( (actionObj.step > 0 && this.buffer[actionObj.channel-1] >= actionObj.value) ||
-              (actionObj.step < 0 && this.buffer[actionObj.channel-1] <= actionObj.value))
-            {
-              this.buffer[actionObj.channel-1] = actionObj.value
-              deleteBufferAction = true
-            }
-          break
-        case "SET":
-          this.buffer[actionObj.channel-1] = actionObj.value
-          deleteBufferAction = true
-          break
-        default:
-          this.logError('Action \'' + actionObj.action + '\' not found!')
-      }
-      this.logTrace('Buffer ' + actionObj.action + ' action on channel: ' + (actionObj.channel).toString() +  ', value: ' +  this.buffer[actionObj.channel-1].toString())
+        var deleteBufferAction = false
+        switch(actionObj.action.toUpperCase())
+        {
+          case "FADETO":
+            this.buffer[actionObj.channel-1] += actionObj.step
+            if( (actionObj.step > 0 && this.buffer[actionObj.channel-1] >= actionObj.value) ||
+                (actionObj.step < 0 && this.buffer[actionObj.channel-1] <= actionObj.value))
+              {
+                this.buffer[actionObj.channel-1] = actionObj.value
+                deleteBufferAction = true
+              }
+            break
+          case "SET":
+            this.buffer[actionObj.channel-1] = actionObj.value
+            deleteBufferAction = true
+            break
+          default:
+            this.logError('Action \'' + actionObj.action + '\' not found!')
+        }
+        this.logTrace('Buffer ' + actionObj.action + ' action on channel: ' + (actionObj.channel).toString() +  ', value: ' +  this.buffer[actionObj.channel-1].toString())
 
-      // remove the action buffer entry for the channel if the work is done (e.g. when we have reached the desired value)
-      if(deleteBufferAction)
+        // update the value on the artnet library
+        this.artnet.set(this.configuration.universe, actionObj.channel , this.buffer[actionObj.channel-1], function(_err, _res){
+          if(_err)
+            self.logError('Error setting artnet value: ' + _err.toString())
+        })
+
+        // remove the action buffer entry for the channel if the work is done (e.g. when we have reached the desired value)
+        if(deleteBufferAction)
+        {
+          delete this.bufferAction[keys[idx]]
+          this.logTrace('Buffer ' + actionObj.action + ' action on channel: ' + (actionObj.channel).toString() + ' deleted')
+        }
+      }
+      catch(_exception)
       {
-        delete this.bufferAction[keys[idx]]
-        this.logTrace('Buffer ' + actionObj.action + ' action on channel: ' + (actionObj.channel).toString() + ' deleted')
+        self.logError('Error processing artnet buffer: ' + _exception.toString(), _exception)
+        console.log(JSON.stringify(this.buffer[actionObj.channel-1]))
+        console.log(JSON.stringify(actionObj))
+        console.log(JSON.stringify(Object.keys(this.bufferAction)))
+        /*
+        null
+        {"action":"FADETO","channel":"49","value":null,"fadeTime":"250","step":-5.08}
+        ["48"]
+        */
       }
-
-      // update the value on the artnet library
-      this.artnet.set(this.configuration.universe, actionObj.channel , this.buffer[actionObj.channel-1], function(_err, _res){
-        if(_err)
-          self.logError('Error setting artnet value: ' + _err.toString())
-      })
     }
   }
 

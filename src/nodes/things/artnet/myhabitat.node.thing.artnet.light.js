@@ -2,6 +2,7 @@
 
 const MyHabitatNode_Thing_ARTNET  = require('./myhabitat.node.thing.artnet.js')
 const CloneDeep                   = require('lodash.clonedeep')
+const Merge                       = require('lodash.merge')
 
 
 module.exports = function(RED) {
@@ -34,6 +35,8 @@ module.exports = function(RED) {
 
     input(_message)
     {
+      super.input(_message)
+
       const payload = _message.payload
 
       // be sure we always have a state object for further processing
@@ -58,7 +61,7 @@ module.exports = function(RED) {
         case "object":
           // we may get a direct color object in the payload
           if(payload.color)
-            _message.state.color = payload.color
+          _message.state.color = payload.color
           break
       }
 
@@ -96,21 +99,21 @@ module.exports = function(RED) {
       return (this.config.lightType === "TW") ? true : false
     }
 
-    updateArtnetValues(_color, _brightness)
+    updateArtnetValues(_color, _brightness, _isOn = this.state().isOn)
     {
       if(this.hasWhite())
       {
-        this.artnetFade(this.config.channelWhite,     _color.white      * (_brightness / 100))
+        this.artnetFade(this.config.channelWhite,     _isOn ? (_color.white       * (_brightness / 100)) : 0)
       }
       if(this.hasWarmWhite())
       {
-        this.artnetFade(this.config.channelWarmWhite, _color.warmwhite  * (_brightness / 100))
+        this.artnetFade(this.config.channelWarmWhite, _isOn ? (_color.warmwhite   * (_brightness / 100)) : 0)
       }
       if(this.hasRGB())
       {
-        this.artnetFade(this.config.channelRed,       _color.red        * (_brightness / 100))
-        this.artnetFade(this.config.channelGreen,     _color.green      * (_brightness / 100))
-        this.artnetFade(this.config.channelBlue,      _color.blue       * (_brightness / 100))
+        this.artnetFade(this.config.channelRed,       _isOn ? (_color.red         * (_brightness / 100)) : 0)
+        this.artnetFade(this.config.channelGreen,     _isOn ? (_color.green       * (_brightness / 100)) : 0)
+        this.artnetFade(this.config.channelBlue,      _isOn ? (_color.blue        * (_brightness / 100)) : 0)
       }
     }
 
@@ -118,7 +121,7 @@ module.exports = function(RED) {
     turnOn()
     {
       // if we are switching on, we have to set the artnet value to the one given in the current state
-      this.updateArtnetValues(this.state().color, this.state().brightness)
+      this.updateArtnetValues(this.state().color, this.state().brightness, true)
       this.state().isOn = true
     }
 
@@ -129,15 +132,17 @@ module.exports = function(RED) {
                                 warmwhite   : 0,
                                 red         : 0,
                                 green       : 0,
-                                blue        : 0}, 0)
+                                blue        : 0}, 0, false)
       this.state().isOn = false
     }
 
 
     setColor(_color)
     {
-      this.updateArtnetValues(_color, this.state().brightness)
-      this.state().color = CloneDeep(_color)
+      // we have to merge the volor into the current state because the color object may not have all the
+      // color properties set
+      Merge(this.state().color, _color)
+      this.updateArtnetValues(this.state().color, this.state().brightness)
     }
 
     setBrightness(_brightness)
