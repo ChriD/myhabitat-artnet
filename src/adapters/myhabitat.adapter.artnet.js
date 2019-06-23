@@ -161,7 +161,9 @@ class MyHabitatAdapter_Artnet extends MyHabitatAdapter
           case "FADETO":
             this.buffer[actionObj.channel-1] += actionObj.step
             if( (actionObj.step > 0 && this.buffer[actionObj.channel-1] >= actionObj.value) ||
-                (actionObj.step < 0 && this.buffer[actionObj.channel-1] <= actionObj.value))
+                (actionObj.step < 0 && this.buffer[actionObj.channel-1] <= actionObj.value) ||
+                (actionObj.step === 0 || this.buffer[actionObj.channel-1] == actionObj.value)
+              )
               {
                 this.buffer[actionObj.channel-1] = actionObj.value
                 deleteBufferAction = true
@@ -174,7 +176,7 @@ class MyHabitatAdapter_Artnet extends MyHabitatAdapter
           default:
             this.logError('Action \'' + actionObj.action + '\' not found!')
         }
-        this.logTrace('Buffer ' + actionObj.action + ' action on channel: ' + (actionObj.channel).toString() +  ', value: ' +  this.buffer[actionObj.channel-1].toString())
+        this.logTrace('Buffer ' + actionObj.action + ' action on channel: ' + (actionObj.channel).toString() +  ', value: ' +  this.buffer[actionObj.channel-1].toString() + ' (to ' + actionObj.value.toString() + ' with step ' + actionObj.step.toString() + ')')
 
         // update the value on the artnet library
         this.artnet.set(this.configuration.universe, actionObj.channel , this.buffer[actionObj.channel-1], function(_err, _res){
