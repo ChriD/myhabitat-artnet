@@ -69,13 +69,18 @@ module.exports = function(RED) {
       // the above code to the physical device
       if(_message.state)
       {
-        if(_message.state.isOn)
-          this.turnOn()
-        if(!_message.state.isOn)
-          this.turnOff()
-        if(_message.state.brightness)
+        if(_message.state.hasOwnProperty('isOn'))
+        {
+          if(_message.state.isOn)
+            this.turnOn()
+          else
+            this.turnOff()
+        }
+
+        if(_message.state.hasOwnProperty('brightness'))
           this.setBrightness(_message.state.brightness)
-        if(_message.state.color)
+
+        if(_message.state.hasOwnProperty('color'))
           this.setColor(_message.state.color)
       }
 
