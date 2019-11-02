@@ -85,7 +85,6 @@ module.exports = function(RED) {
       }
 
       this.updateNodeInfoStatus()
-
     }
 
 
