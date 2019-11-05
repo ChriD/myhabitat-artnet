@@ -1,0 +1,64 @@
+{
+  "_from": "dmxnet@^0.4.0",
+  "_id": "dmxnet@0.4.0",
+  "_inBundle": false,
+  "_integrity": "sha512-5m740UINoPdK22zlEfyaZWoBSMrPNWa3AXdxLNqrLOwE0sFTBdH+m2XH1NAU9Qela+d3C63iVUOf6LKhfXRmIg==",
+  "_location": "/dmxnet",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "range",
+    "registry": true,
+    "raw": "dmxnet@^0.4.0",
+    "name": "dmxnet",
+    "escapedName": "dmxnet",
+    "rawSpec": "^0.4.0",
+    "saveSpec": null,
+    "fetchSpec": "^0.4.0"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/dmxnet/-/dmxnet-0.4.0.tgz",
+  "_shasum": "b879f3a64c77f8fba4fb976f158f0826bfb75aad",
+  "_spec": "dmxnet@^0.4.0",
+  "_where": "D:\\Develop\\NodeRed\\nodes\\myhabitat-artnet",
+  "author": {
+    "name": "margau"
+  },
+  "bugs": {
+    "url": "https://github.com/margau/dmxnet/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "@hibas123/nodelogging": "^2.0.6",
+    "jspack": "0.0.4",
+    "netmask": "^1.0.6"
+  },
+  "deprecated": false,
+  "description": "ArtNet-DMX-sender and receiver for nodejs",
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-strongloop": "^2.1.0"
+  },
+  "homepage": "https://github.com/margau/dmxnet#readme",
+  "keywords": [
+    "artnet",
+    "dmx",
+    "lightning",
+    "stage"
+  ],
+  "license": "MIT",
+  "main": "lib.js",
+  "name": "dmxnet",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/margau/dmxnet.git"
+  },
+  "scripts": {
+    "lint": "eslint --ignore-path .gitignore .",
+    "lintfix": "eslint --ignore-path .gitignore --fix .",
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "version": "0.4.0"
+}

@@ -15,8 +15,14 @@
 'use strict'
 
 const MyHabitatAdapter    = require('myhabitat').MyHabitatAdapter
-const Artnet              = require('artnet')
-const DMXLib              = require('dmxnet')
+
+// i switched from the 'artnet' lib to the 'dmxnet' lib because the 'artnet' lib had some problems running smooth on
+// raspberry PI's. The 'dmxnet' lib does have a nice method to send the artnet values all in ones whcih seems to solve
+// the RPI issue. Currently i am using a modified version of 'dmxnet' due the lib does logging to a file which can not
+// be disabled. That leads to problems when running as service/deamon without having permissions for file write!
+//const Artnet              = require('artnet')
+//const DMXLib              = require('dmxnet')
+const DMXLib              = require('../vendor/dmxnet')
 
 
 class MyHabitatAdapter_Artnet extends MyHabitatAdapter
