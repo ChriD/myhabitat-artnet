@@ -1,7 +1,6 @@
 "use strict"
 
 const MyHabitatNode_Thing_ARTNET  = require('./myhabitat.node.thing.artnet.js')
-const CloneDeep                   = require('lodash.clonedeep')
 const Merge                       = require('lodash.merge')
 
 
@@ -143,7 +142,7 @@ module.exports = function(RED) {
 
     setColor(_color)
     {
-      // we have to merge the volor into the current state because the color object may not have all the
+      // we have to merge the color into the current state because the color object may not have all the
       // color properties set
       Merge(this.state().color, _color)
       this.updateArtnetValues(this.state().color, this.state().brightness)

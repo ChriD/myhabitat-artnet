@@ -12,7 +12,8 @@
     "node-red",
     "home automation system",
     "myhabitat",
-    "myhabitat artnet"
+    "myhabitat artnet",
+    "myhabitat dmx"
   ],
   "node-red": {
     "nodes": {
@@ -23,7 +24,7 @@
   "dependencies": {
     "app-root-path": "^2.2.1",
     "artnet": "^1.4.0",
-    "lodash.clonedeep": "^4.5.0",
+    "dmxnet": "^0.4.0",
     "lodash.merge": "^4.6.1",
     "myhabitat": "^0.0.1"
   }

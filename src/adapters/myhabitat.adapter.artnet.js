@@ -16,6 +16,7 @@
 
 const MyHabitatAdapter    = require('myhabitat').MyHabitatAdapter
 const Artnet              = require('artnet')
+const DMXLib              = require('dmxnet')
 
 
 class MyHabitatAdapter_Artnet extends MyHabitatAdapter
@@ -27,6 +28,7 @@ class MyHabitatAdapter_Artnet extends MyHabitatAdapter
     const self = this
 
     self.artnet                 = null
+    self.artnetSender           = null
 
     // this buffer contains the current value which will be sent to the artnet protocol
     self.buffer                 = [512]
@@ -76,7 +78,16 @@ class MyHabitatAdapter_Artnet extends MyHabitatAdapter
   setupArtnetConnection()
   {
     const self = this
-    self.artnet = new Artnet(this.configuration)
+    //self.artnet = new Artnet(this.configuration)
+    self.artnet = new DMXLib.dmxnet({})
+    self.artnetSender = self.artnet.newSender({
+      ip: self.configuration.host,
+      subnet: 0,
+      universe: self.configuration.universe,
+      net: 0,
+      port: self.configuration.port,
+      base_refresh_interval : self.configuration.refresh
+    });
 
     self.adapterState.connection.host         = self.configuration.host
     self.adapterState.connection.port         = self.configuration.port
@@ -85,17 +96,22 @@ class MyHabitatAdapter_Artnet extends MyHabitatAdapter
 
     self.logDebug('Establish connection to ' + self.configuration.host + ':' + self.configuration.port)
 
-    self.artnet.on('error', function(_error){
-        self.logError("Error: " + _error.toString(), _error)
-      })
+    //self.artnet.on('error', function(_error){
+    //    self.logError("Error: " + _error.toString(), _error)
+    //  })
   }
 
 
   close()
   {
-    if(this.artnet)
-        this.artnet.close()
-    this.artnet = null
+    //if(this.artnet)
+    //    this.artnet.close()
+    //this.artnet = null
+    if(this.artnetSender)
+    {
+      this.artnetSender.stop()
+      this.artnetSender = null
+    }
 
     if(this.bufferUpdateIntervalId)
       clearInterval(this.bufferUpdateIntervalId)
@@ -149,46 +165,47 @@ class MyHabitatAdapter_Artnet extends MyHabitatAdapter
   updateArtnetBuffer()
   {
     const self = this
-    const keys = Object.keys(this.bufferAction)
+    const keys = Object.keys(self.bufferAction)
     for(var idx=0; idx<keys.length; idx++)
     {
       try
       {
-        const actionObj = this.bufferAction[keys[idx]]
+        const actionObj = self.bufferAction[keys[idx]]
         var deleteBufferAction = false
         switch(actionObj.action.toUpperCase())
         {
           case "FADETO":
-            this.buffer[actionObj.channel-1] += actionObj.step
-            if( (actionObj.step > 0 && this.buffer[actionObj.channel-1] >= actionObj.value) ||
-                (actionObj.step < 0 && this.buffer[actionObj.channel-1] <= actionObj.value) ||
-                (actionObj.step === 0 || this.buffer[actionObj.channel-1] == actionObj.value)
+          self.buffer[actionObj.channel-1] += actionObj.step
+            if( (actionObj.step > 0 && self.buffer[actionObj.channel-1] >= actionObj.value) ||
+                (actionObj.step < 0 && self.buffer[actionObj.channel-1] <= actionObj.value) ||
+                (actionObj.step === 0 || self.buffer[actionObj.channel-1] == actionObj.value)
               )
               {
-                this.buffer[actionObj.channel-1] = actionObj.value
+                self.buffer[actionObj.channel-1] = actionObj.value
                 deleteBufferAction = true
               }
             break
           case "SET":
-            this.buffer[actionObj.channel-1] = actionObj.value
+          self.buffer[actionObj.channel-1] = actionObj.value
             deleteBufferAction = true
             break
           default:
-            this.logError('Action \'' + actionObj.action + '\' not found!')
+          self.logError('Action \'' + actionObj.action + '\' not found!')
         }
-        this.logTrace('Buffer ' + actionObj.action + ' action on channel: ' + (actionObj.channel).toString() +  ', value: ' +  this.buffer[actionObj.channel-1].toString() + ' (to ' + actionObj.value.toString() + ' with step ' + actionObj.step.toString() + ')')
+        self.logTrace('Buffer ' + actionObj.action + ' action on channel: ' + (actionObj.channel).toString() +  ', value: ' +  self.buffer[actionObj.channel-1].toString() + ' (to ' + actionObj.value.toString() + ' with step ' + actionObj.step.toString() + ')')
 
-        // update the value on the artnet library
-        this.artnet.set(this.configuration.universe, actionObj.channel , this.buffer[actionObj.channel-1], function(_err, _res){
-          if(_err)
-            self.logError('Error setting artnet value: ' + _err.toString())
-        })
+        // update the value on the artnet library        )
+        //this.artnet.set(self.configuration.universe, actionObj.channel , self.buffer[actionObj.channel-1], function(_err, _res){
+        //  if(_err)
+        //    self.logError('Error setting artnet value: ' + _err.toString())
+        //})
+        self.artnetSender.prepChannel(actionObj.channel-1, self.buffer[actionObj.channel-1])
 
         // remove the action buffer entry for the channel if the work is done (e.g. when we have reached the desired value)
         if(deleteBufferAction)
         {
-          delete this.bufferAction[keys[idx]]
-          this.logTrace('Buffer ' + actionObj.action + ' action on channel: ' + (actionObj.channel).toString() + ' deleted')
+          delete self.bufferAction[keys[idx]]
+          self.logTrace('Buffer ' + actionObj.action + ' action on channel: ' + (actionObj.channel).toString() + ' deleted')
         }
       }
       catch(_exception)
@@ -196,6 +213,8 @@ class MyHabitatAdapter_Artnet extends MyHabitatAdapter
         self.logError('Error processing artnet buffer: ' + _exception.toString(), _exception)
       }
     }
+
+    self.artnetSender.transmit()
   }
 
 }
